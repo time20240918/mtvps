@@ -1794,6 +1794,19 @@ function PlayPageClient() {
 
   const artPlayerRef = useRef<any>(null);
   const artRef = useRef<HTMLDivElement | null>(null);
+  const syncAnime4KCanvasFlip = (flip?: string) => {
+    const canvas = anime4kRef.current?.canvas as HTMLCanvasElement | undefined;
+    if (!canvas) return;
+
+    const currentFlip = flip || artPlayerRef.current?.flip || 'normal';
+    canvas.style.transformOrigin = 'center center';
+    canvas.style.transform =
+      currentFlip === 'horizontal'
+        ? 'scaleX(-1)'
+        : currentFlip === 'vertical'
+          ? 'scaleY(-1)'
+          : 'none';
+  };
   const customSubtitleInputRef = useRef<HTMLInputElement | null>(null);
   const customSubtitleRef = useRef<CustomSubtitleState | null>(null);
   const currentSubtitleLabelRef = useRef<string>('关闭');
@@ -3425,6 +3438,7 @@ function PlayPageClient() {
         handleCanvasClick,
         handleCanvasDblClick,
       };
+      syncAnime4KCanvasFlip();
 
       console.log('Anime4K超分已启用，模式:', anime4kModeRef.current, '倍数:', scale);
       if (artPlayerRef.current) {
@@ -6288,7 +6302,7 @@ function PlayPageClient() {
           screenshot: true,
           setting: true,
           loop: false,
-          flip: false,
+          flip: true,
           playbackRate: true,
           aspectRatio: false,
           fullscreen: !isIOS,  // iOS 禁用原生全屏按钮，避免触发系统播放器
@@ -7313,6 +7327,8 @@ function PlayPageClient() {
         artPlayerRef.current.on('destroy', () => {
           clearPlayerTimeouts();
         });
+
+        artPlayerRef.current.on('flip', syncAnime4KCanvasFlip);
 
         // 监听播放器事件
         artPlayerRef.current.on('ready', async () => {

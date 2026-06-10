@@ -319,6 +319,19 @@ function LivePageClient() {
   // 播放器引用
   const artPlayerRef = useRef<any>(null);
   const artRef = useRef<HTMLDivElement | null>(null);
+  const syncAnime4KCanvasFlip = (flip?: string) => {
+    const canvas = anime4kRef.current?.canvas as HTMLCanvasElement | undefined;
+    if (!canvas) return;
+
+    const currentFlip = flip || artPlayerRef.current?.flip || 'normal';
+    canvas.style.transformOrigin = 'center center';
+    canvas.style.transform =
+      currentFlip === 'horizontal'
+        ? 'scaleX(-1)'
+        : currentFlip === 'vertical'
+          ? 'scaleY(-1)'
+          : 'none';
+  };
 
   // 分组标签滚动相关
   const groupContainerRef = useRef<HTMLDivElement>(null);
@@ -906,6 +919,7 @@ function LivePageClient() {
         handleCanvasClick,
         handleCanvasDblClick,
       };
+      syncAnime4KCanvasFlip();
 
       console.log('Anime4K超分已启用，模式:', anime4kModeRef.current, '倍数:', scale);
       if (artPlayerRef.current) {
@@ -1937,9 +1951,9 @@ function LivePageClient() {
           autoSize: false,
           autoMini: false,
           screenshot: false,
-          setting: webGPUSupported, // 只有支持WebGPU时才显示设置按钮
+          setting: true,
           loop: false,
-          flip: false,
+          flip: true,
           playbackRate: false,
           aspectRatio: false,
           fullscreen: true,
@@ -2052,6 +2066,8 @@ function LivePageClient() {
             ] : []),
           ],
         });
+
+        artPlayerRef.current.on('flip', syncAnime4KCanvasFlip);
 
         // 监听播放器事件
         artPlayerRef.current.on('ready', () => {
